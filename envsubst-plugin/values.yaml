@@ -1,0 +1,21 @@
+# RUN THIS COMMAND TO MAKE ARGO USE BELOW SIDECAR CONTAINER
+# helm upgrade --install argo-cd --set configs.params."server\.insecure"=true  --set server.ingress.enabled=true  --set server.ingress.ingressClassName=nginx   --set global.domain='' -f values.yaml -n argocd argo/argo-cd
+repoServer:
+  extraContainers:
+  - name: envsubst-plugin
+    command:
+    - "/var/run/argocd/argocd-cmp-server"
+    image: aoshfan/envsusbt-plugin:1.0
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 999
+    volumeMounts:
+    - mountPath: /var/run/argocd
+      name: var-files
+    - mountPath: /home/argocd/cmp-server/plugins
+      name: plugins
+    - mountPath: /tmp
+      name: cmp-tmp
+  volumes:
+  - name: cmp-tmp
+    emptyDir: {}
